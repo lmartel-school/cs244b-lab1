@@ -1,0 +1,6 @@
+*.a
+*.o
+*~
+README.html
+server/server
+shell/shell
