@@ -6,7 +6,8 @@ PKGCONFIG = PKG_CONFIG_PATH="xdrpp:$${PKG_CONFIG_PATH}" pkg-config
 # Seems to fix issues with the latest Xcode
 LD := $(CXX)
 
-XDRC := $(shell $(PKGCONFIG) --variable=xdrc xdrpp)
+# Don't use :=, or will break first time
+XDRC = $(shell $(PKGCONFIG) --variable=xdrc xdrpp)
 
 CPPFLAGS := `$(PKGCONFIG) --cflags xdrpp` -I.
 LIBDIRS := -Llibclient
