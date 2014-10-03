@@ -24,14 +24,15 @@ include shell/Makefile
 
 .PHONY: all clean xdrpp
 
-all: xdrpp libclient/libclient.a server/server shell/shell README.html
+all: xdrpp include/server.h libclient/libclient.a server/server	shell/shell 
+
+include/server.h: include/server.x
+	$(XDRC) -hh -o include/server.h $<
 
 xdrpp:
-	if test -d xdrpp; then \
-		cd xdrpp; \
-		test -f Makefile || ./configure CXXFLAGS="$(CXXFLAGS)"; \
-		$(MAKE); \
-	fi
+	+git submodule update --init
+	cd xdrpp; test -f Makefile || ./configure CXXFLAGS="$(CXXFLAGS)"
+	$(MAKE) -C xdrpp
 
 clean:
 	rm -f server/server

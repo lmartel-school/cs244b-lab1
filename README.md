@@ -23,7 +23,7 @@ Getting Started
 
 1. Clone the source code with:
 
-        $ git clone FILLMEIN
+        $ git clone http://cs244b.scs.stanford.edu/labs/lab1.git
 
 XDRPP
 -----

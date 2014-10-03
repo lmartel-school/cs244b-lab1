@@ -13,10 +13,8 @@ server/%.o: server/%.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 generatexdrc: include/server.x
-	$(XDRC) -hh -o include/server.h $<
 	$(XDRC) -serverhh -o server/serverimpl.h $<
 	$(XDRC) -servercc -o server/serverimpl.cc $<
 
 server/server: $(SERVER_OBJ)
 	$(LD) -o $@ $(LDFLAGS) $(SERVER_OBJ) $(LIBS)
-
