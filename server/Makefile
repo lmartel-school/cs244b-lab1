@@ -5,6 +5,7 @@ SERVER_SRC := server/server.cc \
 
 SERVER_OBJ := $(SERVER_SRC:.c=.o)
 SERVER_OBJ := $(SERVER_OBJ:.cc=.o)
+$(SERVER_OBJ): include/server.hh
 
 server/%.o: server/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -12,8 +13,9 @@ server/%.o: server/%.c
 server/%.o: server/%.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-generatexdrc: include/server.x
-	$(XDRC) -serverhh -o server/serverimpl.h $<
+# Generate initial files to be edited
+scaffold: include/server.x xdrpp
+	$(XDRC) -serverhh -o server/serverimpl.hh $<
 	$(XDRC) -servercc -o server/serverimpl.cc $<
 
 server/server: $(SERVER_OBJ)

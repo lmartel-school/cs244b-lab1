@@ -11,7 +11,7 @@
 #include <xdrpp/socket.h>
 
 #include <include/rpcconfig.h>
-#include <include/server.h>
+#include <include/server.hh>
 #include <include/client.h>
 
 using namespace std;

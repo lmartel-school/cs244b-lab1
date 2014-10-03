@@ -11,7 +11,7 @@
 
 #include <xdrpp/srpc.h>
 
-#include <include/server.h>
+#include <include/server.hh>
 #include <include/client.h>
 
 using namespace std;

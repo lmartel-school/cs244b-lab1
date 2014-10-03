@@ -6,7 +6,7 @@ PKGCONFIG = PKG_CONFIG_PATH="xdrpp:$${PKG_CONFIG_PATH}" pkg-config
 # Seems to fix issues with the latest Xcode
 LD := $(CXX)
 
-XDRC := `$(PKGCONFIG) --variable=xdrc xdrpp`
+XDRC := $(shell $(PKGCONFIG) --variable=xdrc xdrpp)
 
 CPPFLAGS := `$(PKGCONFIG) --cflags xdrpp` -I.
 LIBDIRS := -Llibclient
@@ -24,10 +24,10 @@ include shell/Makefile
 
 .PHONY: all clean xdrpp
 
-all: xdrpp include/server.h libclient/libclient.a server/server	shell/shell 
+all: xdrpp include/server.hh libclient/libclient.a server/server shell/shell 
 
-include/server.h: include/server.x
-	$(XDRC) -hh -o include/server.h $<
+include/server.hh: include/server.x
+	$(XDRC) -hh -o include/server.hh $<
 
 xdrpp:
 	+git submodule update --init
