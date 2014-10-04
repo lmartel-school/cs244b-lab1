@@ -16,14 +16,13 @@ Build Dependencies
  * gcc or clang with C++11
  * bison
  * flex
- * pandoc
 
 Getting Started
 ---------------
 
 Clone the source code with:
 
-        $ git clone http://cs244b.scs.stanford.edu/labs/lab1.git
+        $ git clone http://www.scs.stanford.edu/14au-cs244b/labs/lab1.git
 
 XDRPP
 -----
@@ -31,13 +30,13 @@ XDRPP
 You will be using the
 [Open Network Computing (ONC) Remote Procedure Call (RPC)](http://en.wikipedia.org/wiki/Open_Network_Computing_Remote_Procedure_Call)
 protocol to implement this lab.  RPC has been an Internet standard for
-years and widely used, especially in network storage protocols such as
-NFS.  The latest RPC specification is available as
+years and is widely used, especially in network storage protocols such
+as NFS.  The latest RPC specification is available as
 [RFC5531](https://tools.ietf.org/html/rfc5531), though you do not need
 to read that specification for this lab.  The document you may want to
 look at is the External Data Representation (XDR) standard, [RFC4506],
 which describes the language in which you express data structures
-transmitted between computers.
+transmitted between machines with RPC.
 
 XDR is both a language for describing data structures, and a
 specification for how to serialize those data structures.  The
@@ -49,9 +48,9 @@ want consult the
 Traditionally C and C++ implementations of RPC have not been type
 safe.  Fortunately, the instructor has built you a brand new RPC
 implementation, called XDRPP, that takes advantage of C++11 features
-to provide a typesafe interface.  XDRPP consists of a new XDR
-compiler, called `xdrc`, and a runtime library `libxdrpp`.
-Documentation is available
+to provide a type safe interface.  XDRPP consists of an XDR compiler,
+called `xdrc` and a runtime library `libxdrpp`.  Documentation is
+available
 [here](http://www.scs.stanford.edu/14au-cs244b/labs/xdrpp-doc/).
 Source code will automatically be placed in a subdirectory of your lab
 via the git submodule system.
