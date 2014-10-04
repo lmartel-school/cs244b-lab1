@@ -119,7 +119,7 @@ of the API you will need to implement.
 `void set(string key, string value)`
 :   This method sets the value of the specified key.  If the key does not exist 
     it will throw an exception.
-`key_list list(string key)`
+`set<string> list(string key)`
 :   This method will return a set of all sub-keys.  The strings should contain 
     just the name of sub-key, and not the full path of the key.  If the parent 
     key does not exist it will throw an exception.
