@@ -103,7 +103,7 @@ key, and list returns a set of all keys under a given path.
 
 Review `include/client.h` to see what parameters, return values and
 error codes you will need to return to the client.  Here is a summary
-of the API you will need to implement.
+of the C++ API you will need to implement.
 
 `bool create(string key, string value)`
 :   This method creates a key with the specified value.  On success the method 
