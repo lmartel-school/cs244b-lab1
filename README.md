@@ -45,11 +45,11 @@ the syntax in the first lecture, so in addition to [RFC4506] you may
 want consult the
 [lecture nodes](http://www.scs.stanford.edu/14au-cs244b/notes/intro.pdf#18).
 
-Traditionally C and C++ implementations of RPC have not been type
+Traditionally, C and C++ implementations of RPC have not been type
 safe.  Fortunately, the instructor has built you a brand new RPC
 implementation, called XDRPP, that takes advantage of C++11 features
 to provide a type safe interface.  XDRPP consists of an XDR compiler,
-called `xdrc` and a runtime library `libxdrpp`.  Documentation is
+called `xdrc`, and a runtime library `libxdrpp`.  Documentation is
 available
 [here](http://www.scs.stanford.edu/14au-cs244b/labs/xdrpp-doc/).
 Source code will automatically be placed in a subdirectory of your lab
