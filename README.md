@@ -76,9 +76,9 @@ of the API you will need to implement.
 
 Once complete you complete the RPC definition, use the `xdrc` compiler
 (located in `xdrpp/xdrc/xdrc`) to create the XDR definitions in
-(`include/server.h`) as follows:
+(`include/server.hh`) as follows:
 
-    $ make include/server.h
+    $ make include/server.hh
 
 The XDR compiler will also generate the server stubs
 (`server/serverimpl.{cc,h}`) that you will fill in next.  N.B. If you
@@ -116,26 +116,28 @@ parse the request, and serialize the results.  Your code should do all
 the necessary handling to access the database, and return errors when
 necessary.
 
-As part of the implementation you will need to instantiate the database.  We 
-provided you with a simple persistent key-value store in serverdb.h.  It 
-provides you with hasKey, get, set, remove, and list, operations that you will 
-use to implement the full system.
+As part of the implementation you will need to instantiate the
+database.  We provided you with a simple persistent key-value store in
+serverdb.h.  It provides you with hasKey, get, set, remove, and list,
+operations that you will use to implement the full system.
 
-ServerDB will not do any sanity checking for you.  For example if you should 
-not allow the client to delete a key that has children.  Nor should the client 
-create a key with no parent.  The server should sanity check that key names 
-only contain letters, numbers, and slashes to divide the hierarchy.
+ServerDB will not do any sanity checking for you.  For example it is
+your responsibility to prevent the client from deleting a key that has
+children.  Nor should a client be able to create a key with no parent.
+The server should sanity check that key names only contain letters,
+numbers, and slashes to divide the hierarchy.
 
 
 RPC Shell
 ---------
 
-We provided a simple shell for you to test your program.  In one terminal run 
-the server.
+We provided a simple shell for you to test your program.  In one
+terminal run the server.
 
         # server/server
 
-In another you can run the shell by passing in the IP address of the server.
+In another you can run the shell by passing in the IP address of the
+server.
 
         # shell/shell 127.0.0.1
         > create /test abc
@@ -151,7 +153,8 @@ You can run a test script using the shell as well
 
         $ shell/shell 127.0.0.1 test.script
 
-Please do not modify the output of shell/shell.cc or the syntax of existing 
-commands as we will be using the script interface for grading.  Note that the 
-interface is a bit brittle and does not support values with spaces.
+Please do not modify the output of shell/shell.cc or the syntax of
+existing commands as we will be using the script interface for
+grading.  Note that the interface is a bit brittle and does not
+support values with spaces.
 
