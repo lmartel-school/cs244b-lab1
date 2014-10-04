@@ -11,7 +11,7 @@
 
 #include "include/rpcconfig.h"
 
-#include "serverimpl.h"
+#include "serverimpl.hh"
 
 using namespace std;
 using namespace xdr;

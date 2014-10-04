@@ -37,8 +37,6 @@ Client::open(const std::string &host)
 
     auto fd = tcp_connect(host.c_str(), UNIQUE_RPC_PORT);
     client = new srpc_client<api_v1>{fd.release()};
-
-    create("abc", "def");
 }
 
 void
@@ -59,8 +57,14 @@ Client::isConnected()
 bool
 Client::create(const std::string &path, const std::string &val)
 {
-    // TODO: Fill me in
-    return false;
+    kvpair args;
+
+    args.key = path;
+    args.val = val;
+
+    auto r = client->create(args);
+
+    return *r;
 }
 
 bool

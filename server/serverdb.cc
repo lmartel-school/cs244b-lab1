@@ -59,7 +59,7 @@ ServerDB::get(const string &path)
         throw runtime_error("Key not present");
     }
 
-    cout << s.str(0) << endl;
+    return s.str(0);
 }
 
 bool

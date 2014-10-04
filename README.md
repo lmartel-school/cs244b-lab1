@@ -78,6 +78,77 @@ data types.  XDR optional data, which is specified in syntax like C
 pointers, is represented by `xdr::pointer`, a subtype of
 [`std::unique_ptr`](http://en.cppreference.com/w/cpp/memory/unique_ptr).
 
+Overview of the System
+----------------------
+
+Here we will show you how to get started with the system.  First inside the 
+lab1 directory you should try to run make.
+
+        $ make
+
+We have included in the repository a sample `serverimpl.{cc|hh}` file that 
+implements the server side just for the create method.  You will regenerate 
+these files every time you modify the RPC protocol definition by running:
+
+        $ make scaffold
+
+The create method shown below shows how we extract the arguments from the `arg` 
+parameter.  The necessary implementation, some sample logging for debugging, 
+and how the result is set into the local `res`.
+
+        std::unique_ptr<bool>
+        api_v1_server::create(std::unique_ptr<kvpair> arg)
+        {
+          bool hasKey;
+          std::string key = arg.get()->key;
+          std::string val = arg.get()->val;
+          std::unique_ptr<bool> res(new bool);
+         
+          hasKey = db.hasKey(arg.get()->key);
+          if (hasKey) {
+            (*res) = false;
+            std::cout << "Created " << key << " Failed" << std::endl;
+          } else {
+            (*res) = true;
+            db.set(key, val);
+            std::cout << "Created " << key << " Succeeded" << std::endl;
+          }
+        
+          return res;
+        }
+
+In the header for the server implementation we also created a simple 
+constructor to initialize an open the database.
+
+The XDRPP library takes care of all the other serialization and network setup.  
+Our client library `libclient/client.cc` implements wrapper functions to 
+simplify the usage of the RPCs.  Here you should do basic sanity checking, call 
+the RPC method, parse the results and if needed throw an exception.  Below the 
+code for library's create method.
+
+        bool
+        Client::create(const std::string &path, const std::string &val)
+        {
+            kvpair args;
+        
+            args.key = path;
+            args.val = val;
+        
+            auto r = client->create(args);
+        
+            return *r;
+        }
+
+Finally, you should be able to see how this works by running the server and 
+client shell in separate terminals.
+
+        $ server/server
+
+        $ shell/shell
+        > create /test abc
+        CREATED
+        > create /test def
+        KEY ALREADY EXISTS
 
 Defining the RPC Protocol
 -------------------------
@@ -128,19 +199,19 @@ Once complete you complete the RPC definition, use the `xdrc` compiler
 (located in `xdrpp/xdrc/xdrc`) to create the XDR definitions in
 (`include/server.hh`) as follows:
 
-    $ make include/server.hh
+        $ make include/server.hh
 
 The XDR compiler will also generate the server stubs
 (`server/serverimpl.{cc,h}`) that you will fill in next.  N.B. If you
 later modify the protocol you will need to regenerate and merge these
 files by hand.  To generate the server scaffolding, run:
 
-    $ make scaffold
+        $ make scaffold
 
 Since you will edit these files, you may want to add them to your git
 repository with:
 
-    $ git add server/serverimpl.{cc,hh}
+        $ git add server/serverimpl.{cc,hh}
 
 You should choose a unique TCP port number to run your service.  To do this 
 modify the define UNIQUE_RPC_PORT in include/rpcconfig.h.  Choose a random 
@@ -184,12 +255,12 @@ RPC Shell
 We provided a simple shell for you to test your program.  In one
 terminal run the server.
 
-        # server/server
+        $ server/server
 
 In another you can run the shell by passing in the IP address of the
 server.
 
-        # shell/shell 127.0.0.1
+        $ shell/shell 127.0.0.1
         > create /test abc
         CREATED
         > delete /test
