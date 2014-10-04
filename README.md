@@ -28,13 +28,64 @@ Clone the source code with:
 XDRPP
 -----
 
-<fill me in>
+You will be using the
+[Open Network Computing (ONC) Remote Procedure Call (RPC)](http://en.wikipedia.org/wiki/Open_Network_Computing_Remote_Procedure_Call)
+protocol to implement this lab.  RPC has been an Internet standard for
+years and widely used, especially in network storage protocols such as
+NFS.  The latest RPC specification is available as
+[RFC5531](https://tools.ietf.org/html/rfc5531), though you do not need
+to read that specification for this lab.  The document you may want to
+look at is the External Data Representation (XDR) standard, [RFC4506],
+which describes the language in which you express data structures
+transmitted between computers.
 
-Define RPC Protocol
--------------------
+XDR is both a language for describing data structures, and a
+specification for how to serialize those data structures.  The
+language should feel familiar to C and C++ programmers.  We went over
+the syntax in the first lecture, so in addition to [RFC4506] you may
+want consult the
+[lecture nodes](http://www.scs.stanford.edu/14au-cs244b/notes/intro.pdf#18).
 
-First you will need to define the RPC protocol and use the `xdrc`
-compiler to generate the server and client definitions.
+Traditionally C and C++ implementations of RPC have not been type
+safe.  Fortunately, the instructor has built you a brand new RPC
+implementation, called XDRPP, that takes advantage of C++11 features
+to provide a typesafe interface.  XDRPP consists of a new XDR
+compiler, called `xdrc`, and a runtime library `libxdrpp`.
+Documentation is available
+[here](http://www.scs.stanford.edu/14au-cs244b/labs/xdrpp-doc/).
+Source code will automatically be placed in a subdirectory of your lab
+via the git submodule system.
+
+If you have not used C++11, you may wish to familiarize yourself with
+some of the features.  Stroustrup has made
+[a tour of C++](https://isocpp.org/tour) available on line, and the
+[wikipedia page on C++11](http://en.wikipedia.org/wiki/C%2B%2B11)
+summarizes features that will be new to people who have only
+programmed in C++03.
+
+You may wish to look at the "Native Representations" section of the
+[`xdrc` manual page](http://www.scs.stanford.edu/14au-cs244b/labs/xdrpp-doc/md_doc_xdrc_81.html).
+`xdrc` introduces several new container types, including
+`xdr::xstring`, `xdr::xarray`, and `xdr::xvector`.  However, these are
+subtypes of the standard C++11 types
+[`std::string`](http://en.cppreference.com/w/cpp/string/basic_string),
+[`std::array`](http://en.cppreference.com/w/cpp/container/array), and
+[`std::vector`](http://en.cppreference.com/w/cpp/container/vector), so
+for the most part you can use these as if they were the standard
+library types.  XDRPP introduces new subtypes both to keep track of
+the maximum length of containers at the type level as well as to
+provide a few class members that help unify treatment of marshaled
+data types.  XDR optional data, which is specified in syntax like C
+pointers, is represented by `xdr::pointer`, a subtype of
+[`std::unique_ptr`](http://en.cppreference.com/w/cpp/memory/unique_ptr).
+
+
+Defining the RPC Protocol
+-------------------------
+
+You will need to define an RPC protocol in XDR format and use `xdrc`
+to compile the XDR types to C++ types and to generate the server and
+client definitions.
 
 Below is a part of the `include/server.x` protocol definition you will
 need to modify.  We already filled in APIs for create, remove, set.
@@ -157,4 +208,8 @@ Please do not modify the output of shell/shell.cc or the syntax of
 existing commands as we will be using the script interface for
 grading.  Note that the interface is a bit brittle and does not
 support values with spaces.
+
+
+
+[RFC4506]: http://tools.ietf.org/html/rfc4506
 
