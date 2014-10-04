@@ -45,11 +45,11 @@ the syntax in the first lecture, so in addition to [RFC4506] you may
 want consult the
 [lecture nodes](http://www.scs.stanford.edu/14au-cs244b/notes/intro.pdf#18).
 
-Traditionally C and C++ implementations of RPC have not been type
+Traditionally, C and C++ implementations of RPC have not been type
 safe.  Fortunately, the instructor has built you a brand new RPC
 implementation, called XDRPP, that takes advantage of C++11 features
 to provide a type safe interface.  XDRPP consists of an XDR compiler,
-called `xdrc` and a runtime library `libxdrpp`.  Documentation is
+called `xdrc`, and a runtime library `libxdrpp`.  Documentation is
 available
 [here](http://www.scs.stanford.edu/14au-cs244b/labs/xdrpp-doc/).
 Source code will automatically be placed in a subdirectory of your lab
@@ -77,6 +77,14 @@ provide a few class members that help unify treatment of marshaled
 data types.  XDR optional data, which is specified in syntax like C
 pointers, is represented by `xdr::pointer`, a subtype of
 [`std::unique_ptr`](http://en.cppreference.com/w/cpp/memory/unique_ptr).
+
+One useful feature of XDRPP is that is can trace and pretty-print RPC
+calls if you run the following command to set environment variables:
+
+    $ export XDR_TRACE_CLIENT= XDR_TRACE_SERVER=1
+
+When something is going wrong, tracing calls is a good way to
+determine whether the client or the server is to blame.
 
 Overview of the System
 ----------------------
