@@ -86,8 +86,8 @@ calls if you run the following command to set environment variables:
 When something is going wrong, tracing calls is a good way to
 determine whether the client or the server is to blame.
 
-Overview of the System
-----------------------
+Overview
+--------
 
 Here we will show you how to get started with the system.  First inside the 
 lab1 directory you should try to run make.
@@ -102,7 +102,8 @@ these files every time you modify the RPC protocol definition by running:
 
 The create method shown below shows how we extract the arguments from the `arg` 
 parameter.  The necessary implementation, some sample logging for debugging, 
-and how the result is set into the local `res`.
+and how the result is set into the local `res`.  We left out the path sanity 
+checking that you would want to do.
 
         std::unique_ptr<bool>
         api_v1_server::create(std::unique_ptr<kvpair> arg)
@@ -111,7 +112,9 @@ and how the result is set into the local `res`.
           std::string key = arg.get()->key;
           std::string val = arg.get()->val;
           std::unique_ptr<bool> res(new bool);
-         
+
+          // Fill in additional sanity checking (e.g. prevent malformed paths)
+
           hasKey = db.hasKey(arg.get()->key);
           if (hasKey) {
             (*res) = false;
@@ -126,7 +129,7 @@ and how the result is set into the local `res`.
         }
 
 In the header for the server implementation we also created a simple 
-constructor to initialize an open the database.
+constructor to initialize and open the database.
 
 The XDRPP library takes care of all the other serialization and network setup.  
 Our client library `libclient/client.cc` implements wrapper functions to 
@@ -147,7 +150,7 @@ code for library's create method.
             return *r;
         }
 
-Finally, you should be able to see how this works by running the server and 
+Finally, you should be able to test the create method by running the server and 
 client shell in separate terminals.
 
         $ server/server
@@ -157,6 +160,12 @@ client shell in separate terminals.
         CREATED
         > create /test def
         KEY ALREADY EXISTS
+
+N.B. Our create example is to get you started and does not sanity check the 
+path creation.  You should ensure that the server does not allow malformed 
+paths, i.e., paths must begin with a '/' and must contain only letters, numbers 
+and slashes to seperate components.  Like the Zookeeper paper, we should only 
+create nodes if they have parents and delete nodes if they have no children.
 
 Defining the RPC Protocol
 -------------------------
@@ -168,7 +177,8 @@ client definitions.
 Below is a part of the `include/server.x` protocol definition you will
 need to modify.  We already filled in APIs for create, remove, set.
 It is missing both get and list.  The get call returns a particular
-key, and list returns a set of all keys under a given path.
+key, and list returns a set of all keys under a given path.  You may find that 
+you need to change these APIs to express results as error codes.
 
         program server_api {
             version api_v1 {
@@ -186,22 +196,26 @@ of the C++ API you will need to implement.
 
 `bool create(string key, string value)`
 :   This method creates a key with the specified value.  On success the method 
-    returns true.  If the key already exists it should return false.  For any 
-    other errors or malformed keys (i.e. keys with spaces, not beginning with a 
-    '/') we should throw an exception.
+returns true.  If the key already exists it should return false.  For any other 
+errors or malformed keys (i.e. keys with spaces, not beginning with a '/') we 
+should throw an exception.
+
 `bool remove(string key)`
 :   This method removes a key and returns true on success.  Otherwise it will 
-    return a failure.
+return a failure.
+
 `string get(string key)`
 :   This method returns the value of the specified key.  If the key does not 
-    exist it will throw an exception.
+exist it will throw an exception.
+
 `void set(string key, string value)`
 :   This method sets the value of the specified key.  If the key does not exist 
-    it will throw an exception.
+it will throw an exception.
+
 `set<string> list(string key)`
 :   This method will return a set of all sub-keys.  The strings should contain 
-    just the name of sub-key, and not the full path of the key.  If the parent 
-    key does not exist it will throw an exception.
+just the name of sub-key, and not the full path of the key.  If the parent key 
+does not exist it will throw an exception.
 
 Once complete you complete the RPC definition, use the `xdrc` compiler
 (located in `xdrpp/xdrc/xdrc`) to create the XDR definitions in
@@ -287,7 +301,16 @@ existing commands as we will be using the script interface for
 grading.  Note that the interface is a bit brittle and does not
 support values with spaces.
 
+Testing and Submitting
+----------------------
 
+Remember to run both the positive and negative test cases for each of the 
+functions provided.  Verify that the correct error code is returned for each 
+negative test case.
+
+To submit the project please run:
+
+        $ tar zcvf lab1.tgz lab1
 
 [RFC4506]: http://tools.ietf.org/html/rfc4506
 
