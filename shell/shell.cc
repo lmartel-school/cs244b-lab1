@@ -53,10 +53,14 @@ Cmd_Create(int argc, const char *argv[])
         return;
     }
 
-    if (client.create(argv[1], argv[2]))
-        cout << "CREATED" << endl;
-    else
-        cout << "KEY ALREADY EXISTS" << endl;
+    try {
+        if (client.create(argv[1], argv[2]))
+            cout << "CREATED" << endl;
+        else
+            cout << "KEY ALREADY EXISTS" << endl;
+    } catch (ClientException &e) {
+        cout << e.what() << endl;
+    }
 }
 
 void
@@ -67,10 +71,14 @@ Cmd_Remove(int argc, const char *argv[])
         return;
     }
 
-    if (client.remove(argv[1]))
-        cout << "REMOVED" << endl;
-    else
-        cout << "KEY NOT FOUND" << endl;
+    try {
+        if (client.remove(argv[1]))
+            cout << "REMOVED" << endl;
+        else
+            cout << "KEY NOT FOUND" << endl;
+    } catch (ClientException &e) {
+        cout << e.what() << endl;
+    }
 }
 
 void
@@ -83,8 +91,8 @@ Cmd_Set(int argc, const char *argv[])
 
     try {
         client.set(argv[1], argv[2]);
-    } catch (exception &e) {
-        cout << "KEY NOT FOUND" << endl;
+    } catch (ClientException &e) {
+        cout << e.what() << endl;
     }
 }
 
@@ -101,8 +109,8 @@ Cmd_Get(int argc, const char *argv[])
     try {
         result = client.get(argv[1]);
         cout << result << endl;
-    } catch (exception &e) {
-        cout << "KEY NOT FOUND" << endl;
+    } catch (ClientException &e) {
+        cout << e.what() << endl;
     }
 }
 
@@ -118,8 +126,8 @@ Cmd_List(int argc, const char *argv[])
 
     try {
         result = client.list(argv[1]);
-    } catch (exception &e) {
-        cout << "KEY NOT FOUND" << endl;
+    } catch (ClientException &e) {
+        cout << e.what() << endl;
         return;
     }
 
@@ -214,13 +222,26 @@ main(int argc, const char *argv[])
     }
 
     // Setup connection
-    client.open(argv[1]);
+    try {
+        client.open(argv[1]);
+    } catch (exception &e) {
+        cout << "Connection failed!" << endl;
+        cout << "Exception: " << e.what() << endl;
+        return 1;
+    }
 
     // Either execute script or prompt
-    if (argc == 2) {
-        Prompt();
-    } else {
-        RunScript(argv[2]);
+    try {
+        if (argc == 2) {
+            Prompt();
+        } else {
+            RunScript(argv[2]);
+        }
+    } catch(exception &e) {
+        cout << e.what() << endl;
+        return 1;
     }
+
+    return 0;
 }
 

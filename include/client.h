@@ -5,6 +5,54 @@
 #include <set>
 #include <string>
 
+enum ClientError {
+    /*
+     * Set, Get or Remove failed because they key was not found.
+     */
+    KEY_NOT_FOUND,
+    /*
+     * Create operation failed because the key has no parent.
+     */
+    NO_PARENT,
+    /*
+     * The key has children so it cannot be deleted.
+     */
+    HAS_CHILDREN,
+    /*
+     * The key path violates our formatting rules
+     */
+    MALFORMED_KEY,
+};
+
+/*
+ * For server and/or library errors that must delivered to the client
+ */
+class ClientException : public std::exception {
+public:
+    ClientException(enum ClientError err) { errcode = err; }
+    virtual ~ClientException() { }
+    ClientError code() const { return errcode; }
+    const char *what() {
+        switch (errcode) {
+            case KEY_NOT_FOUND:
+                return "KEY NOT FOUND";
+            case NO_PARENT:
+                return "NO PARENT";
+            case HAS_CHILDREN:
+                return "HAS CHILDREN";
+            case MALFORMED_KEY:
+                return "MALFORMED KEY";
+        }
+        return "UNKNOWN ERROR CODE";
+    }
+private:
+    enum ClientError errcode;
+};
+
+/*
+ * For all the remote calls in the Client class you should use the ClientError 
+ * class to throw exceptions that the client's can understand.
+ */
 class Client {
 public:
     Client();
