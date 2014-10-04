@@ -78,6 +78,13 @@ data types.  XDR optional data, which is specified in syntax like C
 pointers, is represented by `xdr::pointer`, a subtype of
 [`std::unique_ptr`](http://en.cppreference.com/w/cpp/memory/unique_ptr).
 
+One useful feature of XDRPP is that is can trace and pretty-print RPC
+calls if you run the following command to set environment variables:
+
+    $ export XDR_TRACE_CLIENT= XDR_TRACE_SERVER=1
+
+When something is going wrong, tracing calls is a good way to
+determine whether the client or the server is to blame.
 
 Defining the RPC Protocol
 -------------------------
