@@ -94,6 +94,23 @@ lab1 directory you should try to run make.
 
         $ make
 
+In order to define the RPCs that your server will support you will modify 
+`server.x` to define the parameters and return values.  Each RPC can take one 
+argument and one return value.  In order to pass multiple parameters you will 
+use structures.  The necessary XDR definition for the create method is shown 
+below.
+
+        struct kvpair {
+            string key<512>;
+            string val<>;
+        };
+
+        program server_api {
+          version api_v1 {
+            bool create(kvpair) = 1;
+          } = 1;
+        } = 0x40048086;
+
 We have included in the repository a sample `serverimpl.{cc|hh}` file that 
 implements the server side just for the create method.  Every time you modify 
 the RPC protocol definition you will need to use the XDRPP compiler to 
@@ -166,7 +183,7 @@ client shell in separate terminals.
 N.B. Our create example is to get you started and does not sanity check the 
 path creation.  You should ensure that the server does not allow malformed 
 paths, i.e., paths must begin with a '/' and must contain only letters, numbers 
-and slashes to seperate components.  Like the Zookeeper paper, we should only 
+and slashes to separate components.  Like the Zookeeper paper, we should only 
 create nodes if they have parents and delete nodes if they have no children.
 
 Defining the RPC Protocol
