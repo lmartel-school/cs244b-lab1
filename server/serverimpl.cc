@@ -10,13 +10,13 @@ std::unique_ptr<bool>
 api_v1_server::create(std::unique_ptr<kvpair> arg)
 {
   bool hasKey;
-  std::string key = arg.get()->key;
-  std::string val = arg.get()->val;
+  std::string key = arg->key;
+  std::string val = arg->val;
   std::unique_ptr<bool> res(new bool);
 
   // Fill in additional sanity checking (e.g. prevent malformed paths)
 
-  hasKey = db.hasKey(arg.get()->key);
+  hasKey = db.hasKey(arg->key);
   if (hasKey) {
     (*res) = false;
     std::cout << "Created " << key << " Failed" << std::endl;

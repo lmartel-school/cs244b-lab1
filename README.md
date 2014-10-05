@@ -3,7 +3,7 @@ Lab #1
 ======
 
 The purpose of Lab #1 is to acquaint you with the concept of Remote
-Procedure Calls (RPCs).  You will building a simple key-value store
+Procedure Calls (RPCs).  You will be building a simple key-value store
 similar to the Zookeeper paper you read for class, but with just a
 single (unreplicated) server.  In the subsequent lab we will make this
 reliable and you can use this as the foundation for your group
@@ -95,8 +95,10 @@ lab1 directory you should try to run make.
         $ make
 
 We have included in the repository a sample `serverimpl.{cc|hh}` file that 
-implements the server side just for the create method.  You will regenerate 
-these files every time you modify the RPC protocol definition by running:
+implements the server side just for the create method.  Every time you modify 
+the RPC protocol definition you will need to use the XDRPP compiler to 
+regenerate these files.  You need to rename the old files and merge your 
+changes into the newly generated files.  To regenerate these files run:
 
         $ make scaffold
 
@@ -310,6 +312,8 @@ negative test case.
 
 To submit the project please run:
 
+        $ make clean
+        $ cd ..
         $ tar zcvf lab1.tgz lab1
 
 [RFC4506]: http://tools.ietf.org/html/rfc4506
