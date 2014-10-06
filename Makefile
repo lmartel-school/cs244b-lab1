@@ -32,7 +32,7 @@ include/server.hh: include/server.x
 
 xdrpp:
 	+git submodule update --init
-	cd xdrpp; test -f Makefile || ./configure CXXFLAGS="$(CXXFLAGS)"
+	cd xdrpp; test -f Makefile || ./configure CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"
 	$(MAKE) -C xdrpp
 
 clean:
