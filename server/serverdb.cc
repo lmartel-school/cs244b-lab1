@@ -7,8 +7,9 @@
 #include <set>
 #include <string>
 #include <iostream>
+#include <memory>
 
-#include <sqlite3.h>
+#include "sqlite3.h"
 
 #include "sqlstmt.h"
 #include "serverdb.h"
