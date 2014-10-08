@@ -313,7 +313,7 @@ server.
 
 You can run a test script using the shell as well
 
-        $ shell/shell 127.0.0.1 test.script
+        $ shell/shell 127.0.0.1 tests/create.tst
 
 Please do not modify the output of shell/shell.cc or the syntax of
 existing commands as we will be using the script interface for
@@ -326,6 +326,18 @@ Testing and Submitting
 Remember to run both the positive and negative test cases for each of the 
 functions provided.  Verify that the correct error code is returned for each 
 negative test case.
+
+In the `tests` directory there are test scripts and sample outputs with both 
+positive and negative tests.  You can run them using the following command 
+line.
+
+        $ shell/shell 127.0.0.1 tests/create.tst
+        $ shell/shell 127.0.0.1 tests/remove.tst
+        $ shell/shell 127.0.0.1 tests/getset.tst
+        $ shell/shell 127.0.0.1 tests/list.tst
+
+If you implemented everything correctly the output will be a binary match to 
+the output files in the same directory.
 
 To submit the project please run:
 
