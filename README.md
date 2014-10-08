@@ -182,9 +182,10 @@ client shell in separate terminals.
 
 N.B. Our create example is to get you started and does not sanity check the 
 path creation.  You should ensure that the server does not allow malformed 
-paths, i.e., paths must begin with a '/' and must contain only letters, numbers 
-and slashes to separate components.  Like the Zookeeper paper, we should only 
-create nodes if they have parents and delete nodes if they have no children.
+paths, i.e., paths must begin with a '/' and must contain only letters, 
+numbers, underscores and slashes to separate components.  Like the Zookeeper 
+paper, we should only create nodes if they have parents and delete nodes if 
+they have no children.
 
 Defining the RPC Protocol
 -------------------------
@@ -287,7 +288,7 @@ ServerDB will not do any sanity checking for you.  For example it is
 your responsibility to prevent the client from deleting a key that has
 children.  Nor should a client be able to create a key with no parent.
 The server should sanity check that key names only contain letters,
-numbers, and slashes to divide the hierarchy.
+numbers, underscores, and slashes to divide the hierarchy.
 
 
 RPC Shell
