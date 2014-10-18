@@ -67,7 +67,7 @@ api_v1_server::remove(std::unique_ptr<longstring> arg)
 
   bool hasKey = db->hasKey(key);
   if (!hasKey) {
-    (*res) = KEY_NOT_FOUND;
+    (*res) = E_KEY_NOT_FOUND;
     std::cout << "Delete " << key << " Failed, KEY NOT FOUND" << std::endl;
     return res;
   }
@@ -84,7 +84,7 @@ api_v1_server::set(std::unique_ptr<kvpair> arg)
 {
   std::unique_ptr<rpc_error_code> res(new rpc_error_code);
 
-  std::string key = *arg->key;
+  std::string key = arg->key;
   std::string val = arg->val;
 
   // Check valid path
@@ -96,7 +96,7 @@ api_v1_server::set(std::unique_ptr<kvpair> arg)
 
   bool hasKey = db->hasKey(key);
   if (!hasKey) {
-    (*res) = KEY_NOT_FOUND;
+    (*res) = E_KEY_NOT_FOUND;
     std::cout << "Set " << key << " Failed, KEY NOT FOUND" << std::endl;
     return res;
   }
@@ -125,7 +125,7 @@ api_v1_server::get(std::unique_ptr<longstring> arg)
 
   bool hasKey = db->hasKey(key);
   if (!hasKey) {
-    res->err() = KEY_NOT_FOUND;
+    res->err() = E_KEY_NOT_FOUND;
     std::cout << "Get " << key << " Failed, KEY NOT FOUND" << std::endl;
     return res;
   }

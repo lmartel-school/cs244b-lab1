@@ -62,22 +62,22 @@ Client::create(const std::string &path, const std::string &val)
     args.key = path;
     args.val = val;
 
-    std::unique_ptr<rpc_error_code> r = client->create(args);
-    throw_from_error_code(*r);
-    return *r == E_SUCCESS;
+    std::unique_ptr<rpc_error_code> result = client->create(args);
+    throw_from_error_code(*result);
+    return *result == E_SUCCESS;
 }
 
 bool
 Client::remove(const std::string &path)
 {
-    std::unique_ptr<rpc_error_code> result = client->list(path);
-    return *r == E_SUCCESS;
+    std::unique_ptr<rpc_error_code> result = client->remove(path);
+    return *result == E_SUCCESS;
 }
 
 std::string
 Client::get(const std::string &path)
 {
-    std::unique_ptr<val_or_err> result = client->list(path);
+    std::unique_ptr<val_or_err> result = client->get(path);
     if(!result->success()){
       throw_from_error_code(result->err());
     }
@@ -93,22 +93,22 @@ Client::set(const std::string &path, const std::string &val)
     args.key = path;
     args.val = val;
 
-    std::unique_ptr<rpc_error_code> r = client->create(args);
-    throw_from_error_code(*r);
+    std::unique_ptr<rpc_error_code> result = client->set(args);
+    throw_from_error_code(*result);
 }
 
 std::set<string>
 Client::list(const string &path)
 {
     std::unique_ptr<keys_or_err> result = client->list(path);
-    std::set<string> r;
+    std::set<string> keys;
     if(result->success()){
-      for(auto s : result->vals()) r.insert(s);
+      for(auto s : result->vals()) keys.insert(s);
     } else {
       throw_from_error_code(result->err());
     }
 
-    return r;
+    return keys;
 }
 
 // Private
