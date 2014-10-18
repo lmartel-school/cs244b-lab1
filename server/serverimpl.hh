@@ -15,6 +15,9 @@ public:
   std::unique_ptr<rpc_error_code> remove(std::unique_ptr<longstring> arg);
   std::unique_ptr<rpc_error_code> set(std::unique_ptr<kvpair> arg);
   std::unique_ptr<retpair> get(std::unique_ptr<longstring> arg);
+
+private:
+  bool validate_path(const std::string & path);
 };
 
 #endif // !__XDR_SERVER_SERVERIMPL_HH_INCLUDED__

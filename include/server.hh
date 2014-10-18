@@ -8,11 +8,12 @@
 #include <xdrpp/types.h>
 
 enum rpc_error_code : std::uint32_t {
-  SUCCESS = 0,
-  KEY_NOT_FOUND = 1,
-  NO_PARENT = 2,
-  HAS_CHILDREN = 3,
-  MALFORMED_KEY = 4,
+  E_SUCCESS = 0,
+  E_KEY_NOT_FOUND = 1,
+  E_NO_PARENT = 2,
+  E_HAS_CHILDREN = 3,
+  E_MALFORMED_KEY = 4,
+  E_KEY_EXISTS = 5,
 };
 namespace xdr {
 template<> struct xdr_traits<::rpc_error_code>
@@ -21,16 +22,18 @@ template<> struct xdr_traits<::rpc_error_code>
   static constexpr bool is_numeric = false;
   static const char *enum_name(::rpc_error_code val) {
     switch (val) {
-    case ::SUCCESS:
-      return "SUCCESS";
-    case ::KEY_NOT_FOUND:
-      return "KEY_NOT_FOUND";
-    case ::NO_PARENT:
-      return "NO_PARENT";
-    case ::HAS_CHILDREN:
-      return "HAS_CHILDREN";
-    case ::MALFORMED_KEY:
-      return "MALFORMED_KEY";
+    case ::E_SUCCESS:
+      return "E_SUCCESS";
+    case ::E_KEY_NOT_FOUND:
+      return "E_KEY_NOT_FOUND";
+    case ::E_NO_PARENT:
+      return "E_NO_PARENT";
+    case ::E_HAS_CHILDREN:
+      return "E_HAS_CHILDREN";
+    case ::E_MALFORMED_KEY:
+      return "E_MALFORMED_KEY";
+    case ::E_KEY_EXISTS:
+      return "E_KEY_EXISTS";
     default:
       return nullptr;
     }
@@ -77,13 +80,13 @@ public:
   static_assert (sizeof (int) <= 4, "union discriminant must be 4 bytes");
 
   static constexpr int _xdr_field_number(std::uint32_t which) {
-    return which == SUCCESS ? 1
+    return which == E_SUCCESS ? 1
       : 2;
   }
   template<typename _F, typename...A> static bool
   _xdr_with_mem_ptr(_F &_f, std::uint32_t which, A&&...a) {
     switch (which) {
-    case SUCCESS:
+    case E_SUCCESS:
       _f(&val_or_err::val_, std::forward<A>(a)...);
       return true;
     default:
@@ -178,7 +181,7 @@ template<> struct xdr_traits<::val_or_err> : xdr_traits_base {
   using discriminant_type = decltype(std::declval<union_type>().status());
 
   static constexpr const char *union_field_name(std::uint32_t which) {
-    return which == SUCCESS ? "val"
+    return which == E_SUCCESS ? "val"
       : "err";
   }
   static const char *union_field_name(const union_type &u) {
@@ -200,6 +203,177 @@ template<> struct xdr_traits<::val_or_err> : xdr_traits_base {
   }
   template<typename Archive> static void
   load(Archive &ar, ::val_or_err &obj) {
+    discriminant_type which;
+    xdr::archive(ar, which, "status");
+    obj.status(which);
+    obj._xdr_with_mem_ptr(field_archiver, obj.status(), ar, obj,
+                          union_field_name(which));
+  }
+};
+}
+
+struct string_list_node {
+  xdr::xstring<> val{};
+  xdr::pointer<string_list_node> next{};
+};
+namespace xdr {
+template<> struct xdr_traits<::string_list_node>
+  : xdr_struct_base<field_ptr<::string_list_node,
+                              decltype(::string_list_node::val),
+                              &::string_list_node::val>,
+                    field_ptr<::string_list_node,
+                              decltype(::string_list_node::next),
+                              &::string_list_node::next>> {
+  template<typename Archive> static void
+  save(Archive &ar, const ::string_list_node &obj) {
+    archive(ar, obj.val, "val");
+    archive(ar, obj.next, "next");
+  }
+  template<typename Archive> static void
+  load(Archive &ar, ::string_list_node &obj) {
+    archive(ar, obj.val, "val");
+    archive(ar, obj.next, "next");
+  }
+};
+}
+
+using string_list = xdr::pointer<string_list>;
+
+struct vals_or_err {
+private:
+  std::uint32_t status_;
+  union {
+    string_list vals_;
+    rpc_error_code err_;
+  };
+
+public:
+  static_assert (sizeof (int) <= 4, "union discriminant must be 4 bytes");
+
+  static constexpr int _xdr_field_number(std::uint32_t which) {
+    return which == E_SUCCESS ? 1
+      : 2;
+  }
+  template<typename _F, typename...A> static bool
+  _xdr_with_mem_ptr(_F &_f, std::uint32_t which, A&&...a) {
+    switch (which) {
+    case E_SUCCESS:
+      _f(&vals_or_err::vals_, std::forward<A>(a)...);
+      return true;
+    default:
+      _f(&vals_or_err::err_, std::forward<A>(a)...);
+      return true;
+    }
+  }
+
+  std::uint32_t _xdr_discriminant() const { return status_; }
+  void _xdr_discriminant(std::uint32_t which, bool validate = true) {
+    int fnum = _xdr_field_number(which);
+    if (fnum < 0 && validate)
+      throw xdr::xdr_bad_discriminant("bad value of status in vals_or_err");
+    if (fnum != _xdr_field_number(status_)) {
+      this->~vals_or_err();
+      status_ = which;
+      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this);
+    }
+  }
+  vals_or_err(std::int32_t which = std::int32_t{}) : status_(which) {
+    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this);
+  }
+  vals_or_err(const vals_or_err &source) : status_(source.status_) {
+    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this, source);
+  }
+  vals_or_err(vals_or_err &&source) : status_(source.status_) {
+    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this,
+                      std::move(source));
+  }
+  ~vals_or_err() { _xdr_with_mem_ptr(xdr::field_destructor, status_, *this); }
+  vals_or_err &operator=(const vals_or_err &source) {
+    if (_xdr_field_number(status_) 
+        == _xdr_field_number(source.status_))
+      _xdr_with_mem_ptr(xdr::field_assigner, status_, *this, source);
+    else {
+      this->~vals_or_err();
+      status_ = std::uint32_t(-1);
+      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this, source);
+    }
+    status_ = source.status_;
+    return *this;
+  }
+  vals_or_err &operator=(vals_or_err &&source) {
+    if (_xdr_field_number(status_)
+         == _xdr_field_number(source.status_))
+      _xdr_with_mem_ptr(xdr::field_assigner, status_, *this,
+                        std::move(source));
+    else {
+      this->~vals_or_err();
+      status_ = std::uint32_t(-1);
+      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this,
+                        std::move(source));
+    }
+    status_ = source.status_;
+    return *this;
+  }
+
+  std::int32_t status() const { return std::int32_t(status_); }
+  vals_or_err &status(int _xdr_d, bool _xdr_validate = true) {
+    _xdr_discriminant(_xdr_d, _xdr_validate);
+    return *this;
+  }
+
+  string_list &vals() {
+    if (_xdr_field_number(status_) == 1)
+      return vals_;
+    throw xdr::xdr_wrong_union("vals_or_err: vals accessed when not selected");
+  }
+  const string_list &vals() const {
+    if (_xdr_field_number(status_) == 1)
+      return vals_;
+    throw xdr::xdr_wrong_union("vals_or_err: vals accessed when not selected");
+  }
+  rpc_error_code &err() {
+    if (_xdr_field_number(status_) == 2)
+      return err_;
+    throw xdr::xdr_wrong_union("vals_or_err: err accessed when not selected");
+  }
+  const rpc_error_code &err() const {
+    if (_xdr_field_number(status_) == 2)
+      return err_;
+    throw xdr::xdr_wrong_union("vals_or_err: err accessed when not selected");
+  }
+};
+namespace xdr {
+template<> struct xdr_traits<::vals_or_err> : xdr_traits_base {
+  static constexpr bool is_class = true;
+  static constexpr bool is_union = true;
+  static constexpr bool has_fixed_size = false;
+
+  using union_type = ::vals_or_err;
+  using discriminant_type = decltype(std::declval<union_type>().status());
+
+  static constexpr const char *union_field_name(std::uint32_t which) {
+    return which == E_SUCCESS ? "vals"
+      : "err";
+  }
+  static const char *union_field_name(const union_type &u) {
+    return union_field_name(u._xdr_discriminant());
+  }
+
+  static std::size_t serial_size(const ::vals_or_err &obj) {
+    std::size_t size = 0;
+    if (!obj._xdr_with_mem_ptr(field_size, obj._xdr_discriminant(), obj, size))
+      throw xdr_bad_discriminant("bad value of status in vals_or_err");
+    return size + 4;
+  }
+  template<typename Archive> static void
+  save(Archive &ar, const ::vals_or_err &obj) {
+    xdr::archive(ar, obj.status(), "status");
+    if (!obj._xdr_with_mem_ptr(field_archiver, obj.status(), ar, obj,
+                               union_field_name(obj)))
+      throw xdr_bad_discriminant("bad value of status in vals_or_err");
+  }
+  template<typename Archive> static void
+  load(Archive &ar, ::vals_or_err &obj) {
     discriminant_type which;
     xdr::archive(ar, which, "status");
     obj.status(which);
@@ -287,8 +461,8 @@ struct api_v1 {
     static constexpr const char *proc_name = "get";
     using arg_type = longstring;
     using arg_wire_type = longstring;
-    using res_type = retpair;
-    using res_wire_type = retpair;
+    using res_type = val_or_err;
+    using res_wire_type = val_or_err;
     
     template<typename C, typename...A> static auto
     dispatch(C &&c, A &&...a) ->
@@ -300,6 +474,28 @@ struct api_v1 {
     dispatch_dropvoid(C &&c, DropIfVoid &&d, A &&...a) ->
     decltype(c.get(std::forward<DropIfVoid>(d), std::forward<A>(a)...)) {
       return c.get(std::forward<DropIfVoid>(d), std::forward<A>(a)...);
+    }
+  };
+
+  struct list_t {
+    using interface_type = api_v1;
+    static constexpr std::uint32_t proc = 5;
+    static constexpr const char *proc_name = "list";
+    using arg_type = longstring;
+    using arg_wire_type = longstring;
+    using res_type = vals_or_err;
+    using res_wire_type = vals_or_err;
+    
+    template<typename C, typename...A> static auto
+    dispatch(C &&c, A &&...a) ->
+    decltype(c.list(std::forward<A>(a)...)) {
+      return c.list(std::forward<A>(a)...);
+    }
+    
+    template<typename C, typename DropIfVoid, typename...A> static auto
+    dispatch_dropvoid(C &&c, DropIfVoid &&d, A &&...a) ->
+    decltype(c.list(std::forward<DropIfVoid>(d), std::forward<A>(a)...)) {
+      return c.list(std::forward<DropIfVoid>(d), std::forward<A>(a)...);
     }
   };
 
@@ -317,6 +513,9 @@ struct api_v1 {
       return true;
     case 4:
       t.template dispatch<get_t>(std::forward<A>(a)...);
+      return true;
+    case 5:
+      t.template dispatch<list_t>(std::forward<A>(a)...);
       return true;
     }
     return false;
@@ -347,6 +546,12 @@ struct api_v1 {
     get(_XDRARGS &&..._xdr_args) ->
     decltype(this->_XDRBASE::template invoke<get_t>(_xdr_args...)) {
       return this->_XDRBASE::template invoke<get_t>(_xdr_args...);
+    }
+
+    template<typename..._XDRARGS> auto
+    list(_XDRARGS &&..._xdr_args) ->
+    decltype(this->_XDRBASE::template invoke<list_t>(_xdr_args...)) {
+      return this->_XDRBASE::template invoke<list_t>(_xdr_args...);
     }
   };
 };
