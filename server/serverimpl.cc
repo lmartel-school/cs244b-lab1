@@ -65,10 +65,18 @@ api_v1_server::remove(std::unique_ptr<longstring> arg)
     return res;
   }
 
+  // Check node exists
   bool hasKey = db->hasKey(key);
   if (!hasKey) {
     (*res) = E_KEY_NOT_FOUND;
     std::cout << "Delete " << key << " Failed, KEY NOT FOUND" << std::endl;
+    return res;
+  }
+
+  // Check node has no children
+  if(db->list(key).size() > 0){
+    (*res) = E_HAS_CHILDREN;
+    std::cout << "Delete " << key << " Failed, HAS CHILDREN" << std::endl;
     return res;
   }
 
