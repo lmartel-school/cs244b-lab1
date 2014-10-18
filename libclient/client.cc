@@ -70,21 +70,31 @@ Client::create(const std::string &path, const std::string &val)
 bool
 Client::remove(const std::string &path)
 {
-    // TODO: Fill me in
-    return false;
+    std::unique_ptr<rpc_error_code> result = client->list(path);
+    return *r == E_SUCCESS;
 }
 
 std::string
 Client::get(const std::string &path)
 {
-    // TODO: Fill me in
-    return "";
+    std::unique_ptr<val_or_err> result = client->list(path);
+    if(!result->success()){
+      throw_from_error_code(result->err());
+    }
+
+    return result->val();
 }
 
 void
 Client::set(const std::string &path, const std::string &val)
 {
-    // TODO: Fill me in
+    kvpair args;
+
+    args.key = path;
+    args.val = val;
+
+    std::unique_ptr<rpc_error_code> r = client->create(args);
+    throw_from_error_code(*r);
 }
 
 std::set<string>
