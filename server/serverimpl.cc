@@ -3,8 +3,6 @@
 
 #include "server/serverimpl.hh"
 
-rpc_error_code 
-
 std::unique_ptr<rpc_error_code>
 api_v1_server::create(std::unique_ptr<kvpair> arg)
 {
@@ -67,12 +65,24 @@ api_v1_server::set(std::unique_ptr<kvpair> arg)
   return res;
 }
 
-std::unique_ptr<retpair>
+std::unique_ptr<val_or_err>
 api_v1_server::get(std::unique_ptr<longstring> arg)
 {
-  std::unique_ptr<retpair> res(new retpair);
+  std::unique_ptr<val_or_err> res(new val_or_err);
   
   // Fill in function body here
+  
+  return res;
+}
+
+std::unique_ptr<vals_or_err>
+api_v1_server::list(std::unique_ptr<longstring> arg)
+{
+  std::unique_ptr<vals_or_err> res(new vals_or_err);
+  
+  // Fill in function body here
+  //
+  // TODO special case '/'
   
   return res;
 }
