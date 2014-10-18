@@ -71,6 +71,7 @@ bool
 Client::remove(const std::string &path)
 {
     std::unique_ptr<rpc_error_code> result = client->remove(path);
+    throw_from_error_code(*result);
     return *result == E_SUCCESS;
 }
 
