@@ -8,32 +8,26 @@ enum rpc_error_code {
 };
 
 typedef string longstring<>;
+typedef string keystring<512>;
 
 struct kvpair {
     string key<512>;
     string val<>;
 };
 
-union val_or_err switch (int status) {
-    case E_SUCCESS:
-        string val<>;
+union val_or_err switch (bool success) {
+    case true:
+        longstring val;
     default:
         rpc_error_code err;
 };
 
-struct string_list_node {
-    string val<>;
-    string_list_node *next;
-};
-typedef string_list* string_list;
-
-union vals_or_err switch (int status) {
-    case E_SUCCESS:
-        string_list vals;
+union keys_or_err switch (bool success) {
+    case true:
+        keystring vals<>;
     default:
         rpc_error_code err;
 };
-
 
 program server_api {
   version api_v1 {
@@ -41,7 +35,7 @@ program server_api {
     rpc_error_code remove(longstring) = 2;
     rpc_error_code set(kvpair) = 3;
     val_or_err get(longstring) = 4;
-    vals_or_err list(longstring) = 5;
+    keys_or_err list(longstring) = 5;
 } = 1;
 } = 0x40048086;
 

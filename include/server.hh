@@ -7,6 +7,8 @@
 
 #include <xdrpp/types.h>
 
+#include "server/serverdb.h"
+
 enum rpc_error_code : std::uint32_t {
   E_SUCCESS = 0,
   E_KEY_NOT_FOUND = 1,
@@ -42,6 +44,7 @@ template<> struct xdr_traits<::rpc_error_code>
 }
 
 using longstring = xdr::xstring<>;
+using keystring = xdr::xstring<512>;
 
 struct kvpair {
   xdr::xstring<512> key{};
@@ -70,23 +73,23 @@ template<> struct xdr_traits<::kvpair>
 
 struct val_or_err {
 private:
-  std::uint32_t status_;
+  std::uint32_t success_;
   union {
-    xdr::xstring<> val_;
+    longstring val_;
     rpc_error_code err_;
   };
 
 public:
-  static_assert (sizeof (int) <= 4, "union discriminant must be 4 bytes");
+  static_assert (sizeof (bool) <= 4, "union discriminant must be 4 bytes");
 
   static constexpr int _xdr_field_number(std::uint32_t which) {
-    return which == E_SUCCESS ? 1
+    return which == true ? 1
       : 2;
   }
   template<typename _F, typename...A> static bool
   _xdr_with_mem_ptr(_F &_f, std::uint32_t which, A&&...a) {
-    switch (which) {
-    case E_SUCCESS:
+    switch (std::uint32_t{which}) {
+    case true:
       _f(&val_or_err::val_, std::forward<A>(a)...);
       return true;
     default:
@@ -95,78 +98,78 @@ public:
     }
   }
 
-  std::uint32_t _xdr_discriminant() const { return status_; }
+  std::uint32_t _xdr_discriminant() const { return success_; }
   void _xdr_discriminant(std::uint32_t which, bool validate = true) {
     int fnum = _xdr_field_number(which);
     if (fnum < 0 && validate)
-      throw xdr::xdr_bad_discriminant("bad value of status in val_or_err");
-    if (fnum != _xdr_field_number(status_)) {
+      throw xdr::xdr_bad_discriminant("bad value of success in val_or_err");
+    if (fnum != _xdr_field_number(success_)) {
       this->~val_or_err();
-      status_ = which;
-      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this);
+      success_ = which;
+      _xdr_with_mem_ptr(xdr::field_constructor, success_, *this);
     }
   }
-  val_or_err(std::int32_t which = std::int32_t{}) : status_(which) {
-    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this);
+  val_or_err(bool which = bool{}) : success_(which) {
+    _xdr_with_mem_ptr(xdr::field_constructor, success_, *this);
   }
-  val_or_err(const val_or_err &source) : status_(source.status_) {
-    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this, source);
+  val_or_err(const val_or_err &source) : success_(source.success_) {
+    _xdr_with_mem_ptr(xdr::field_constructor, success_, *this, source);
   }
-  val_or_err(val_or_err &&source) : status_(source.status_) {
-    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this,
+  val_or_err(val_or_err &&source) : success_(source.success_) {
+    _xdr_with_mem_ptr(xdr::field_constructor, success_, *this,
                       std::move(source));
   }
-  ~val_or_err() { _xdr_with_mem_ptr(xdr::field_destructor, status_, *this); }
+  ~val_or_err() { _xdr_with_mem_ptr(xdr::field_destructor, success_, *this); }
   val_or_err &operator=(const val_or_err &source) {
-    if (_xdr_field_number(status_) 
-        == _xdr_field_number(source.status_))
-      _xdr_with_mem_ptr(xdr::field_assigner, status_, *this, source);
+    if (_xdr_field_number(success_) 
+        == _xdr_field_number(source.success_))
+      _xdr_with_mem_ptr(xdr::field_assigner, success_, *this, source);
     else {
       this->~val_or_err();
-      status_ = std::uint32_t(-1);
-      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this, source);
+      success_ = std::uint32_t(-1);
+      _xdr_with_mem_ptr(xdr::field_constructor, success_, *this, source);
     }
-    status_ = source.status_;
+    success_ = source.success_;
     return *this;
   }
   val_or_err &operator=(val_or_err &&source) {
-    if (_xdr_field_number(status_)
-         == _xdr_field_number(source.status_))
-      _xdr_with_mem_ptr(xdr::field_assigner, status_, *this,
+    if (_xdr_field_number(success_)
+         == _xdr_field_number(source.success_))
+      _xdr_with_mem_ptr(xdr::field_assigner, success_, *this,
                         std::move(source));
     else {
       this->~val_or_err();
-      status_ = std::uint32_t(-1);
-      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this,
+      success_ = std::uint32_t(-1);
+      _xdr_with_mem_ptr(xdr::field_constructor, success_, *this,
                         std::move(source));
     }
-    status_ = source.status_;
+    success_ = source.success_;
     return *this;
   }
 
-  std::int32_t status() const { return std::int32_t(status_); }
-  val_or_err &status(int _xdr_d, bool _xdr_validate = true) {
+  bool success() const { return bool(success_); }
+  val_or_err &success(bool _xdr_d, bool _xdr_validate = true) {
     _xdr_discriminant(_xdr_d, _xdr_validate);
     return *this;
   }
 
-  xdr::xstring<> &val() {
-    if (_xdr_field_number(status_) == 1)
+  longstring &val() {
+    if (_xdr_field_number(success_) == 1)
       return val_;
     throw xdr::xdr_wrong_union("val_or_err: val accessed when not selected");
   }
-  const xdr::xstring<> &val() const {
-    if (_xdr_field_number(status_) == 1)
+  const longstring &val() const {
+    if (_xdr_field_number(success_) == 1)
       return val_;
     throw xdr::xdr_wrong_union("val_or_err: val accessed when not selected");
   }
   rpc_error_code &err() {
-    if (_xdr_field_number(status_) == 2)
+    if (_xdr_field_number(success_) == 2)
       return err_;
     throw xdr::xdr_wrong_union("val_or_err: err accessed when not selected");
   }
   const rpc_error_code &err() const {
-    if (_xdr_field_number(status_) == 2)
+    if (_xdr_field_number(success_) == 2)
       return err_;
     throw xdr::xdr_wrong_union("val_or_err: err accessed when not selected");
   }
@@ -178,10 +181,10 @@ template<> struct xdr_traits<::val_or_err> : xdr_traits_base {
   static constexpr bool has_fixed_size = false;
 
   using union_type = ::val_or_err;
-  using discriminant_type = decltype(std::declval<union_type>().status());
+  using discriminant_type = decltype(std::declval<union_type>().success());
 
   static constexpr const char *union_field_name(std::uint32_t which) {
-    return which == E_SUCCESS ? "val"
+    return which == true ? "val"
       : "err";
   }
   static const char *union_field_name(const union_type &u) {
@@ -191,193 +194,166 @@ template<> struct xdr_traits<::val_or_err> : xdr_traits_base {
   static std::size_t serial_size(const ::val_or_err &obj) {
     std::size_t size = 0;
     if (!obj._xdr_with_mem_ptr(field_size, obj._xdr_discriminant(), obj, size))
-      throw xdr_bad_discriminant("bad value of status in val_or_err");
+      throw xdr_bad_discriminant("bad value of success in val_or_err");
     return size + 4;
   }
   template<typename Archive> static void
   save(Archive &ar, const ::val_or_err &obj) {
-    xdr::archive(ar, obj.status(), "status");
-    if (!obj._xdr_with_mem_ptr(field_archiver, obj.status(), ar, obj,
+    xdr::archive(ar, obj.success(), "success");
+    if (!obj._xdr_with_mem_ptr(field_archiver, obj.success(), ar, obj,
                                union_field_name(obj)))
-      throw xdr_bad_discriminant("bad value of status in val_or_err");
+      throw xdr_bad_discriminant("bad value of success in val_or_err");
   }
   template<typename Archive> static void
   load(Archive &ar, ::val_or_err &obj) {
     discriminant_type which;
-    xdr::archive(ar, which, "status");
-    obj.status(which);
-    obj._xdr_with_mem_ptr(field_archiver, obj.status(), ar, obj,
+    xdr::archive(ar, which, "success");
+    obj.success(which);
+    obj._xdr_with_mem_ptr(field_archiver, obj.success(), ar, obj,
                           union_field_name(which));
   }
 };
 }
 
-struct string_list_node {
-  xdr::xstring<> val{};
-  xdr::pointer<string_list_node> next{};
-};
-namespace xdr {
-template<> struct xdr_traits<::string_list_node>
-  : xdr_struct_base<field_ptr<::string_list_node,
-                              decltype(::string_list_node::val),
-                              &::string_list_node::val>,
-                    field_ptr<::string_list_node,
-                              decltype(::string_list_node::next),
-                              &::string_list_node::next>> {
-  template<typename Archive> static void
-  save(Archive &ar, const ::string_list_node &obj) {
-    archive(ar, obj.val, "val");
-    archive(ar, obj.next, "next");
-  }
-  template<typename Archive> static void
-  load(Archive &ar, ::string_list_node &obj) {
-    archive(ar, obj.val, "val");
-    archive(ar, obj.next, "next");
-  }
-};
-}
-
-using string_list = xdr::pointer<string_list>;
-
-struct vals_or_err {
+struct keys_or_err {
 private:
-  std::uint32_t status_;
+  std::uint32_t success_;
   union {
-    string_list vals_;
+    xdr::xvector<keystring> vals_;
     rpc_error_code err_;
   };
 
 public:
-  static_assert (sizeof (int) <= 4, "union discriminant must be 4 bytes");
+  static_assert (sizeof (bool) <= 4, "union discriminant must be 4 bytes");
 
   static constexpr int _xdr_field_number(std::uint32_t which) {
-    return which == E_SUCCESS ? 1
+    return which == true ? 1
       : 2;
   }
   template<typename _F, typename...A> static bool
   _xdr_with_mem_ptr(_F &_f, std::uint32_t which, A&&...a) {
-    switch (which) {
-    case E_SUCCESS:
-      _f(&vals_or_err::vals_, std::forward<A>(a)...);
+    switch (std::uint32_t{which}) {
+    case true:
+      _f(&keys_or_err::vals_, std::forward<A>(a)...);
       return true;
     default:
-      _f(&vals_or_err::err_, std::forward<A>(a)...);
+      _f(&keys_or_err::err_, std::forward<A>(a)...);
       return true;
     }
   }
 
-  std::uint32_t _xdr_discriminant() const { return status_; }
+  std::uint32_t _xdr_discriminant() const { return success_; }
   void _xdr_discriminant(std::uint32_t which, bool validate = true) {
     int fnum = _xdr_field_number(which);
     if (fnum < 0 && validate)
-      throw xdr::xdr_bad_discriminant("bad value of status in vals_or_err");
-    if (fnum != _xdr_field_number(status_)) {
-      this->~vals_or_err();
-      status_ = which;
-      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this);
+      throw xdr::xdr_bad_discriminant("bad value of success in keys_or_err");
+    if (fnum != _xdr_field_number(success_)) {
+      this->~keys_or_err();
+      success_ = which;
+      _xdr_with_mem_ptr(xdr::field_constructor, success_, *this);
     }
   }
-  vals_or_err(std::int32_t which = std::int32_t{}) : status_(which) {
-    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this);
+  keys_or_err(bool which = bool{}) : success_(which) {
+    _xdr_with_mem_ptr(xdr::field_constructor, success_, *this);
   }
-  vals_or_err(const vals_or_err &source) : status_(source.status_) {
-    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this, source);
+  keys_or_err(const keys_or_err &source) : success_(source.success_) {
+    _xdr_with_mem_ptr(xdr::field_constructor, success_, *this, source);
   }
-  vals_or_err(vals_or_err &&source) : status_(source.status_) {
-    _xdr_with_mem_ptr(xdr::field_constructor, status_, *this,
+  keys_or_err(keys_or_err &&source) : success_(source.success_) {
+    _xdr_with_mem_ptr(xdr::field_constructor, success_, *this,
                       std::move(source));
   }
-  ~vals_or_err() { _xdr_with_mem_ptr(xdr::field_destructor, status_, *this); }
-  vals_or_err &operator=(const vals_or_err &source) {
-    if (_xdr_field_number(status_) 
-        == _xdr_field_number(source.status_))
-      _xdr_with_mem_ptr(xdr::field_assigner, status_, *this, source);
+  ~keys_or_err() { _xdr_with_mem_ptr(xdr::field_destructor, success_, *this); }
+  keys_or_err &operator=(const keys_or_err &source) {
+    if (_xdr_field_number(success_) 
+        == _xdr_field_number(source.success_))
+      _xdr_with_mem_ptr(xdr::field_assigner, success_, *this, source);
     else {
-      this->~vals_or_err();
-      status_ = std::uint32_t(-1);
-      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this, source);
+      this->~keys_or_err();
+      success_ = std::uint32_t(-1);
+      _xdr_with_mem_ptr(xdr::field_constructor, success_, *this, source);
     }
-    status_ = source.status_;
+    success_ = source.success_;
     return *this;
   }
-  vals_or_err &operator=(vals_or_err &&source) {
-    if (_xdr_field_number(status_)
-         == _xdr_field_number(source.status_))
-      _xdr_with_mem_ptr(xdr::field_assigner, status_, *this,
+  keys_or_err &operator=(keys_or_err &&source) {
+    if (_xdr_field_number(success_)
+         == _xdr_field_number(source.success_))
+      _xdr_with_mem_ptr(xdr::field_assigner, success_, *this,
                         std::move(source));
     else {
-      this->~vals_or_err();
-      status_ = std::uint32_t(-1);
-      _xdr_with_mem_ptr(xdr::field_constructor, status_, *this,
+      this->~keys_or_err();
+      success_ = std::uint32_t(-1);
+      _xdr_with_mem_ptr(xdr::field_constructor, success_, *this,
                         std::move(source));
     }
-    status_ = source.status_;
+    success_ = source.success_;
     return *this;
   }
 
-  std::int32_t status() const { return std::int32_t(status_); }
-  vals_or_err &status(int _xdr_d, bool _xdr_validate = true) {
+  bool success() const { return bool(success_); }
+  keys_or_err &success(bool _xdr_d, bool _xdr_validate = true) {
     _xdr_discriminant(_xdr_d, _xdr_validate);
     return *this;
   }
 
-  string_list &vals() {
-    if (_xdr_field_number(status_) == 1)
+  xdr::xvector<keystring> &vals() {
+    if (_xdr_field_number(success_) == 1)
       return vals_;
-    throw xdr::xdr_wrong_union("vals_or_err: vals accessed when not selected");
+    throw xdr::xdr_wrong_union("keys_or_err: vals accessed when not selected");
   }
-  const string_list &vals() const {
-    if (_xdr_field_number(status_) == 1)
+  const xdr::xvector<keystring> &vals() const {
+    if (_xdr_field_number(success_) == 1)
       return vals_;
-    throw xdr::xdr_wrong_union("vals_or_err: vals accessed when not selected");
+    throw xdr::xdr_wrong_union("keys_or_err: vals accessed when not selected");
   }
   rpc_error_code &err() {
-    if (_xdr_field_number(status_) == 2)
+    if (_xdr_field_number(success_) == 2)
       return err_;
-    throw xdr::xdr_wrong_union("vals_or_err: err accessed when not selected");
+    throw xdr::xdr_wrong_union("keys_or_err: err accessed when not selected");
   }
   const rpc_error_code &err() const {
-    if (_xdr_field_number(status_) == 2)
+    if (_xdr_field_number(success_) == 2)
       return err_;
-    throw xdr::xdr_wrong_union("vals_or_err: err accessed when not selected");
+    throw xdr::xdr_wrong_union("keys_or_err: err accessed when not selected");
   }
 };
 namespace xdr {
-template<> struct xdr_traits<::vals_or_err> : xdr_traits_base {
+template<> struct xdr_traits<::keys_or_err> : xdr_traits_base {
   static constexpr bool is_class = true;
   static constexpr bool is_union = true;
   static constexpr bool has_fixed_size = false;
 
-  using union_type = ::vals_or_err;
-  using discriminant_type = decltype(std::declval<union_type>().status());
+  using union_type = ::keys_or_err;
+  using discriminant_type = decltype(std::declval<union_type>().success());
 
   static constexpr const char *union_field_name(std::uint32_t which) {
-    return which == E_SUCCESS ? "vals"
+    return which == true ? "vals"
       : "err";
   }
   static const char *union_field_name(const union_type &u) {
     return union_field_name(u._xdr_discriminant());
   }
 
-  static std::size_t serial_size(const ::vals_or_err &obj) {
+  static std::size_t serial_size(const ::keys_or_err &obj) {
     std::size_t size = 0;
     if (!obj._xdr_with_mem_ptr(field_size, obj._xdr_discriminant(), obj, size))
-      throw xdr_bad_discriminant("bad value of status in vals_or_err");
+      throw xdr_bad_discriminant("bad value of success in keys_or_err");
     return size + 4;
   }
   template<typename Archive> static void
-  save(Archive &ar, const ::vals_or_err &obj) {
-    xdr::archive(ar, obj.status(), "status");
-    if (!obj._xdr_with_mem_ptr(field_archiver, obj.status(), ar, obj,
+  save(Archive &ar, const ::keys_or_err &obj) {
+    xdr::archive(ar, obj.success(), "success");
+    if (!obj._xdr_with_mem_ptr(field_archiver, obj.success(), ar, obj,
                                union_field_name(obj)))
-      throw xdr_bad_discriminant("bad value of status in vals_or_err");
+      throw xdr_bad_discriminant("bad value of success in keys_or_err");
   }
   template<typename Archive> static void
-  load(Archive &ar, ::vals_or_err &obj) {
+  load(Archive &ar, ::keys_or_err &obj) {
     discriminant_type which;
-    xdr::archive(ar, which, "status");
-    obj.status(which);
-    obj._xdr_with_mem_ptr(field_archiver, obj.status(), ar, obj,
+    xdr::archive(ar, which, "success");
+    obj.success(which);
+    obj._xdr_with_mem_ptr(field_archiver, obj.success(), ar, obj,
                           union_field_name(which));
   }
 };
@@ -483,8 +459,8 @@ struct api_v1 {
     static constexpr const char *proc_name = "list";
     using arg_type = longstring;
     using arg_wire_type = longstring;
-    using res_type = vals_or_err;
-    using res_wire_type = vals_or_err;
+    using res_type = keys_or_err;
+    using res_wire_type = keys_or_err;
     
     template<typename C, typename...A> static auto
     dispatch(C &&c, A &&...a) ->

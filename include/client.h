@@ -22,6 +22,7 @@ enum ClientError {
      * The key path violates our formatting rules
      */
     MALFORMED_KEY,
+    UNKNOWN_ERROR
 };
 
 /*
@@ -42,6 +43,8 @@ public:
                 return "HAS CHILDREN";
             case MALFORMED_KEY:
                 return "MALFORMED KEY";
+            case UNKNOWN_ERROR:
+                break;
         }
         return "UNKNOWN ERROR CODE";
     }
@@ -105,6 +108,8 @@ public:
     std::set<std::string> list(const std::string &path);
 private:
     xdr::srpc_client<api_v1> *client;
+
+    void throw_from_error_code(rpc_error_code err);
 };
 
 #endif /* __CLIENT_H__ */

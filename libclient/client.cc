@@ -62,9 +62,9 @@ Client::create(const std::string &path, const std::string &val)
     args.key = path;
     args.val = val;
 
-    auto r = client->create(args);
-
-    return *r;
+    std::unique_ptr<rpc_error_code> r = client->create(args);
+    throw_from_error_code(*r);
+    return *r == E_SUCCESS;
 }
 
 bool
@@ -90,8 +90,34 @@ Client::set(const std::string &path, const std::string &val)
 std::set<string>
 Client::list(const string &path)
 {
+    std::unique_ptr<keys_or_err> result = client->list(path);
     std::set<string> r;
-    // TODO: Fill me in
+    if(result->success()){
+      for(auto s : result->vals()) r.insert(s);
+    } else {
+      throw_from_error_code(result->err());
+    }
+
     return r;
 }
 
+// Private
+
+void
+Client::throw_from_error_code(rpc_error_code err){
+  switch(err){
+    case E_KEY_NOT_FOUND:
+      throw ClientException(KEY_NOT_FOUND);
+    case E_NO_PARENT:
+      throw ClientException(NO_PARENT);
+    case E_HAS_CHILDREN:
+      throw ClientException(HAS_CHILDREN);
+    case E_MALFORMED_KEY:
+      throw ClientException(MALFORMED_KEY);
+    case E_SUCCESS:
+    case E_KEY_EXISTS: // create returns false here but does not throw
+      return;
+    default:
+      throw ClientException(UNKNOWN_ERROR);
+  }
+}
