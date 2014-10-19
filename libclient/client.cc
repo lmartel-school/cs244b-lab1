@@ -71,7 +71,7 @@ bool
 Client::remove(const std::string &path)
 {
     std::unique_ptr<rpc_error_code> result = client->remove(path);
-    throw_from_error_code(*result);
+    if(*result != E_KEY_NOT_FOUND) throw_from_error_code(*result); // return false but don't throw on KEY_NOT_FOUND
     return *result == E_SUCCESS;
 }
 
